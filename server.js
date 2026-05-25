@@ -88,7 +88,29 @@ app.delete('/api/todos/:id', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+// ========== 账号注销 ==========
+app.delete('/api/account', authMiddleware, (req, res) => {
+  // 不允许注销最后一个管理员
+  if (req.isAdmin) {
+    const admins = db.prepare('SELECT COUNT(*) as c FROM users WHERE is_admin = 1').get().c;
+    if (admins <= 1) return res.status(400).json({ error: '你是唯一的管理员，请先将其他用户提升为管理员后再注销' });
+  }
+  db.prepare('DELETE FROM todos WHERE user_id = ?').run(req.userId);
+  db.prepare('DELETE FROM users WHERE id = ?').run(req.userId);
+  res.json({ ok: true });
+});
+
 // ========== 管理员接口 ==========
+// 管理员删除用户
+app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, (req, res) => {
+  const targetId = parseInt(req.params.userId);
+  if (targetId === req.userId) return res.status(400).json({ error: '不能删除自己，请使用注销功能' });
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+  if (!user) return res.status(404).json({ error: '用户不存在' });
+  db.prepare('DELETE FROM todos WHERE user_id = ?').run(targetId);
+  db.prepare('DELETE FROM users WHERE id = ?').run(targetId);
+  res.json({ ok: true });
+});
 app.get('/api/admin/users', authMiddleware, adminMiddleware, (req, res) => {
   const admin = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
   const users = db.prepare('SELECT id, username, is_admin, created_at FROM users ORDER BY created_at DESC').all();

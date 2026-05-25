@@ -194,6 +194,22 @@ body {
 .admin-content th { color: var(--text-secondary); font-weight: 600; }
 .promote-btn {
   background: var(--accent); color: #fff; border: none;
-  padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+  padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-right: 4px;
 }
 .promote-btn:hover { background: var(--accent-hover); }
+.del-user-btn {
+  background: var(--danger); color: #fff; border: none;
+  padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+}
+.del-user-btn:hover { background: var(--danger-hover); }
+.admin-actions { white-space: nowrap; }
+
+/* ========== 账号操作 ========== */
+.account-actions {
+  text-align: center; padding-top: 8px;
+}
+.danger-btn {
+  background: none; border: 1px solid var(--danger); color: var(--danger);
+  padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+}
+.danger-btn:hover { background: var(--danger); color: #fff; }
