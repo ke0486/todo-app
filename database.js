@@ -53,6 +53,8 @@ function matchAll(row, conditions, params) {
       case '!=': if (row[c.col] == actual) return false; break;
       case '>': if (!(row[c.col] > actual)) return false; break;
       case '<': if (!(row[c.col] < actual)) return false; break;
+      case '>=': if (!(row[c.col] >= actual)) return false; break;
+      case '<=': if (!(row[c.col] <= actual)) return false; break;
     }
   }
   return true;
@@ -83,6 +85,7 @@ function queryOne(table, whereStr, params) {
 
 function insert(table, row) {
   const data = load();
+  if (!data[table]) data[table] = [];
   row.id = data._nextId++;
   if (!row.created_at) row.created_at = now();
   data[table].push(row);
@@ -209,9 +212,10 @@ const db = {
       run(...params) {
         if (parsed.type === 'INSERT') {
           const row = {};
+          let pi = 0;
           parsed.cols.forEach((col, i) => {
             const v = parsed.vals[i];
-            row[col] = v === '?' ? params[i] : isNaN(v) ? v : Number(v);
+            row[col] = v === '?' ? params[pi++] : isNaN(v) ? v : Number(v);
           });
           return insert(parsed.table, row);
         }

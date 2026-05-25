@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Todo</title>
-<link rel="stylesheet" href="style.css?v=2">
+<title>Todo Pro</title>
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
 <div id="authPage" class="auth-container" style="display:none;">
   <div class="auth-card">
-    <h1>Todo</h1>
+    <h1>Todo Pro</h1>
     <div class="auth-tabs">
       <button class="auth-tab active" data-tab="login">登录</button>
       <button class="auth-tab" data-tab="register">注册</button>
@@ -34,25 +34,55 @@
   <div class="app">
     <div class="header">
       <div>
-        <h1>Todo</h1>
+        <h1>Todo Pro</h1>
         <p class="date" id="today"></p>
       </div>
       <div class="header-right">
+        <button id="btnTheme" title="切换深色模式">🌓</button>
         <span class="username" id="displayName"></span>
-        <button class="logout-btn" id="btnLogout">退出登录</button>
+        <button id="btnLogout">退出登录</button>
       </div>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索任务..." />
     </div>
 
     <div class="input-wrap">
       <input type="text" id="inputTitle" placeholder="添加新任务..." maxlength="200" />
       <input type="date" id="inputDue" />
+      <select id="inputTag">
+        <option value="">标签</option>
+        <option value="work">工作</option>
+        <option value="life">生活</option>
+        <option value="study">学习</option>
+        <option value="other">其他</option>
+      </select>
+      <select id="inputRepeat">
+        <option value="">不重复</option>
+        <option value="daily">每天</option>
+        <option value="weekly">每周</option>
+        <option value="monthly">每月</option>
+      </select>
+      <div class="prio-btns" id="prioBtns">
+        <button class="prio-btn mid active" data-p="1">中</button>
+        <button class="prio-btn high" data-p="2">高</button>
+        <button class="prio-btn low" data-p="0">低</button>
+      </div>
       <button id="btnAdd">添加</button>
     </div>
 
-    <div class="filters">
+    <div class="filters" id="filters">
       <button data-filter="all" class="active">全部</button>
       <button data-filter="active">未完成</button>
       <button data-filter="completed">已完成</button>
+      <span class="filter-sep">|</span>
+      <button class="tag-filter-btn" data-tag="">所有标签</button>
+      <button class="tag-filter-btn" data-tag="work">工作</button>
+      <button class="tag-filter-btn" data-tag="life">生活</button>
+      <button class="tag-filter-btn" data-tag="study">学习</button>
+      <button class="tag-filter-btn" data-tag="other">其他</button>
     </div>
 
     <div class="todo-list" id="todoList"></div>
@@ -62,15 +92,16 @@
       <button id="btnClearDone">清除已完成</button>
     </div>
 
-    <div class="account-actions">
-      <button id="btnDeleteAccount" class="danger-btn">注销账号</button>
+    <div class="bottom-actions">
+      <button id="btnExportJSON">导出 JSON</button>
+      <button id="btnExportCSV">导出 CSV</button>
+      <button class="danger-btn" id="btnDeleteAccount">注销账号</button>
     </div>
 
-    <!-- JS动态注入 -->
     <div id="adminArea"></div>
   </div>
 </div>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>
