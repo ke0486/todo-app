@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========== 登录/注册页 ========== -->
+<div id="authPage" class="auth-container" style="display:none;">
+  <div class="auth-card">
+    <h1>Todo</h1>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">登录</button>
+      <button class="auth-tab" data-tab="register">注册</button>
+    </div>
+
+    <!-- 登录表单 -->
+    <form id="loginForm" class="auth-form">
+      <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username" />
+      <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password" />
+      <p class="auth-error" id="loginError"></p>
+      <button type="submit">登录</button>
+    </form>
+
+    <!-- 注册表单 -->
+    <form id="registerForm" class="auth-form" style="display:none;">
+      <input type="text" id="regUsername" placeholder="用户名" autocomplete="username" />
+      <input type="password" id="regPassword" placeholder="密码（至少4位）" autocomplete="new-password" />
+      <p class="auth-error" id="regError"></p>
+      <button type="submit">注册</button>
+    </form>
+  </div>
+</div>
+
+<!-- ========== Todo 主页面 ========== -->
+<div id="todoPage" style="display:none;">
+  <div class="app">
+    <div class="header">
+      <div>
+        <h1>Todo</h1>
+        <p class="date" id="today"></p>
+      </div>
+      <div class="header-right">
+        <span class="username" id="displayName"></span>
+        <button class="logout-btn" id="btnLogout">退出登录</button>
+      </div>
+    </div>
+
+    <div class="input-wrap">
+      <input type="text" id="inputTitle" placeholder="添加新任务..." maxlength="200" />
+      <input type="date" id="inputDue" />
+      <button id="btnAdd">添加</button>
+    </div>
+
+    <div class="filters">
+      <button data-filter="all" class="active">全部</button>
+      <button data-filter="active">未完成</button>
+      <button data-filter="completed">已完成</button>
+    </div>
+
+    <div class="todo-list" id="todoList"></div>
+
+    <div class="stats" id="stats" style="display:none;">
+      <span id="remainingText"></span>
+      <button id="btnClearDone">清除已完成</button>
+    </div>
+
+    <!-- 用户列表（管理员查看） -->
+    <details class="admin-panel" id="adminPanel" style="display:none;">
+      <summary>用户管理 (点击展开)</summary>
+      <div class="admin-content" id="adminContent"></div>
+    </details>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
