@@ -84,9 +84,13 @@ app.delete('/api/todos/:id', authMiddleware, (req, res) => {
 app.get('/api/admin/users', authMiddleware, adminMiddleware, (req, res) => {
   const admin = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
   const users = db.prepare('SELECT id, username, is_admin, created_at FROM users ORDER BY created_at DESC').all();
-  const todoStats = db.prepare('SELECT user_id, COUNT(*) as total, SUM(CASE WHEN done=1 THEN 1 ELSE 0 END) as done_count FROM todos GROUP BY user_id').all();
+  const allTodos = db.prepare('SELECT * FROM todos').all();
   const todoMap = {};
-  todoStats.forEach(t => todoMap[t.user_id] = { total: t.total, done: t.done_count });
+  allTodos.forEach(t => {
+    if (!todoMap[t.user_id]) todoMap[t.user_id] = { total: 0, done: 0 };
+    todoMap[t.user_id].total++;
+    if (t.done) todoMap[t.user_id].done++;
+  });
 
   res.json({
     current_user: { id: admin.id, username: admin.username },
