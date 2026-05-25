@@ -192,3 +192,8 @@ body {
   padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
 }
 .admin-content th { color: var(--text-secondary); font-weight: 600; }
+.promote-btn {
+  background: var(--accent); color: #fff; border: none;
+  padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+}
+.promote-btn:hover { background: var(--accent-hover); }

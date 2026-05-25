@@ -11,11 +11,22 @@ const db = new Database(path.join(dataDir, 'todo.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// 为已有表添加 is_admin 列（如果不存在）
+try { db.exec(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0`); } catch {}
+
+// 如果已有用户但没有管理员，把最早注册的用户设为管理员
+const adminCount = db.prepare('SELECT COUNT(*) as c FROM users WHERE is_admin = 1').get().c;
+if (adminCount === 0) {
+  const first = db.prepare('SELECT id FROM users ORDER BY id ASC LIMIT 1').get();
+  if (first) db.prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(first.id);
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    is_admin INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   );
 

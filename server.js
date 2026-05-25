@@ -1,11 +1,18 @@
 const express = require('express');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 const db = require('./database');
-const { register, login, authMiddleware } = require('./auth');
+const { register, login, authMiddleware, adminMiddleware } = require('./auth');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const SECRET = 'todo-secret-key';
+
+function makeToken(user) {
+  return jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin }, SECRET, { expiresIn: '7d' });
+}
 
 // ========== 用户 ==========
 app.post('/api/register', (req, res) => {
@@ -15,8 +22,8 @@ app.post('/api/register', (req, res) => {
 
   try {
     const user = register(username, password);
-    const token = require('jsonwebtoken').sign({ id: user.id, username: user.username }, 'todo-secret-key', { expiresIn: '7d' });
-    res.json({ token, user: { id: user.id, username: user.username } });
+    const token = makeToken(user);
+    res.json({ token, user: { id: user.id, username: user.username, is_admin: user.is_admin } });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
@@ -29,8 +36,8 @@ app.post('/api/login', (req, res) => {
   const user = login(username, password);
   if (!user) return res.status(401).json({ error: '用户名或密码错误' });
 
-  const token = require('jsonwebtoken').sign({ id: user.id, username: user.username }, 'todo-secret-key', { expiresIn: '7d' });
-  res.json({ token, user: { id: user.id, username: user.username } });
+  const token = makeToken(user);
+  res.json({ token, user: { id: user.id, username: user.username, is_admin: user.is_admin } });
 });
 
 // ========== Todo CRUD ==========
@@ -73,13 +80,13 @@ app.delete('/api/todos/:id', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
-// ========== 用户列表（后端查看） ==========
-app.get('/api/admin/users', authMiddleware, (req, res) => {
+// ========== 管理员接口 ==========
+app.get('/api/admin/users', authMiddleware, adminMiddleware, (req, res) => {
   const admin = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
-  const users = db.prepare('SELECT id, username, created_at FROM users ORDER BY created_at DESC').all();
-  const todos = db.prepare('SELECT user_id, COUNT(*) as total, SUM(CASE WHEN done=1 THEN 1 ELSE 0 END) as done_count FROM todos GROUP BY user_id').all();
+  const users = db.prepare('SELECT id, username, is_admin, created_at FROM users ORDER BY created_at DESC').all();
+  const todoStats = db.prepare('SELECT user_id, COUNT(*) as total, SUM(CASE WHEN done=1 THEN 1 ELSE 0 END) as done_count FROM todos GROUP BY user_id').all();
   const todoMap = {};
-  todos.forEach(t => todoMap[t.user_id] = { total: t.total, done: t.done_count });
+  todoStats.forEach(t => todoMap[t.user_id] = { total: t.total, done: t.done_count });
 
   res.json({
     current_user: { id: admin.id, username: admin.username },
@@ -90,6 +97,16 @@ app.get('/api/admin/users', authMiddleware, (req, res) => {
       todos_done: (todoMap[u.id] && todoMap[u.id].done) || 0,
     })),
   });
+});
+
+// 管理员提升其他用户为管理员
+app.post('/api/admin/promote', authMiddleware, adminMiddleware, (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: '请指定用户名' });
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  if (!user) return res.status(404).json({ error: '用户不存在' });
+  db.prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(user.id);
+  res.json({ ok: true, message: `${username} 已成为管理员` });
 });
 
 // ========== 启动 ==========

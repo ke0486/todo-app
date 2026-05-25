@@ -26,7 +26,7 @@ function showTodoPage() {
   document.getElementById('todoPage').style.display = 'block';
   document.getElementById('displayName').textContent = currentUser.username;
   loadTodos();
-  loadAdminPanel();
+  if (currentUser.is_admin) loadAdminPanel();
 }
 
 // ========== 登录/注册处理 ==========
@@ -275,21 +275,38 @@ async function loadAdminPanel() {
         共 <strong>${data.user_count}</strong> 位用户
       </p>
       <table>
-        <thead><tr><th>用户名</th><th>Todo总数</th><th>已完成</th><th>注册时间</th></tr></thead>
+        <thead><tr><th>用户名</th><th>角色</th><th>Todo总数</th><th>已完成</th><th>注册时间</th><th>操作</th></tr></thead>
         <tbody>
           ${data.users.map(u => `
             <tr>
               <td>${escHtml(u.username)}${u.id === data.current_user.id ? ' (你)' : ''}</td>
+              <td>${u.is_admin ? '管理员' : '用户'}</td>
               <td>${u.todos_total}</td>
               <td>${u.todos_done}</td>
               <td>${u.created_at}</td>
+              <td>${!u.is_admin ? `<button class="promote-btn" data-username="${escHtml(u.username)}">提升为管理员</button>` : ''}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
     `;
+
+    content.querySelectorAll('.promote-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          const result = await api('/api/admin/promote', {
+            method: 'POST',
+            body: JSON.stringify({ username: btn.dataset.username }),
+          });
+          alert(result.message);
+          loadAdminPanel();
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    });
   } catch {
-    // 不显示 admin 面板
+    // 非管理员不显示
   }
 }
 
