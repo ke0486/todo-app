@@ -45,6 +45,10 @@ app.post('/api/login', (req, res) => {
 });
 
 // ========== Todo CRUD ==========
+app.get('/api/me', authMiddleware, (req, res) => {
+  const user = db.prepare('SELECT id, username, is_admin FROM users WHERE id = ?').get(req.userId);
+  res.json(user);
+});
 app.get('/api/todos', authMiddleware, (req, res) => {
   const todos = db.prepare('SELECT * FROM todos WHERE user_id = ? ORDER BY created_at DESC').all(req.userId);
   res.json(todos);

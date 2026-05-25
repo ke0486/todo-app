@@ -21,9 +21,20 @@ function showAuthPage() {
   document.getElementById('todoPage').style.display = 'none';
 }
 
-function showTodoPage() {
+async function showTodoPage() {
   document.getElementById('authPage').style.display = 'none';
   document.getElementById('todoPage').style.display = 'block';
+
+  // 从服务器获取最新的用户信息（包括 is_admin）
+  try {
+    const me = await api('/api/me');
+    currentUser = me;
+    localStorage.setItem('user', JSON.stringify(me));
+  } catch (err) {
+    showAuthPage();
+    return;
+  }
+
   document.getElementById('displayName').textContent = currentUser.username;
   loadTodos();
   if (currentUser.is_admin) loadAdminPanel();
