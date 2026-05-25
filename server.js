@@ -6,7 +6,11 @@ const { register, login, authMiddleware, adminMiddleware } = require('./auth');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+}));
 
 const SECRET = 'todo-secret-key';
 
