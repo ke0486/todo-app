@@ -1,13 +1,16 @@
-const Database = require('better-sqlite3');
+const fs = require('fs');
 const path = require('path');
 
-const db = new Database(path.join(__dirname, 'data', 'todo.db'));
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-// 启用 WAL 模式提升并发性能
+const Database = require('better-sqlite3');
+const db = new Database(path.join(dataDir, 'todo.db'));
+
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
-// 建表
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
